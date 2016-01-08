@@ -21,9 +21,9 @@ class OpbeatHandler(BaseOpbeatHandler):
         logging.Handler.__init__(self)
 
     def _get_client(self):
-        from opbeat.contrib.django.models import client
+        from opbeat.contrib.django.models import get_client
 
-        return client
+        return get_client()
 
     client = property(_get_client)
 

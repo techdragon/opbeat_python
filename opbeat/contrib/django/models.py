@@ -35,78 +35,6 @@ def get_installed_apps():
         out.add(app)
     return out
 
-_client = (None, None)
-
-
-class ProxyClient(object):
-    """
-    A proxy which represents the currenty client at all times.
-    """
-    # introspection support:
-    __members__ = property(lambda x: x.__dir__())
-
-    # Need to pretend to be the wrapped class, for the sake of objects that care
-    # about this (especially in equality tests)
-    __class__ = property(lambda x: get_client().__class__)
-
-    __dict__ = property(lambda o: get_client().__dict__)
-
-    __repr__ = lambda: repr(get_client())
-    __getattr__ = lambda x, o: getattr(get_client(), o)
-    __setattr__ = lambda x, o, v: setattr(get_client(), o, v)
-    __delattr__ = lambda x, o: delattr(get_client(), o)
-
-    __lt__ = lambda x, o: get_client() < o
-    __le__ = lambda x, o: get_client() <= o
-    __eq__ = lambda x, o: get_client() == o
-    __ne__ = lambda x, o: get_client() != o
-    __gt__ = lambda x, o: get_client() > o
-    __ge__ = lambda x, o: get_client() >= o
-    if six.PY2:
-        __cmp__ = lambda x, o: cmp(get_client(), o)
-    __hash__ = lambda x: hash(get_client())
-    # attributes are currently not callable
-    # __call__ = lambda x, *a, **kw: get_client()(*a, **kw)
-    __nonzero__ = lambda x: bool(get_client())
-    __len__ = lambda x: len(get_client())
-    __getitem__ = lambda x, i: get_client()[i]
-    __iter__ = lambda x: iter(get_client())
-    __contains__ = lambda x, i: i in get_client()
-    __getslice__ = lambda x, i, j: get_client()[i:j]
-    __add__ = lambda x, o: get_client() + o
-    __sub__ = lambda x, o: get_client() - o
-    __mul__ = lambda x, o: get_client() * o
-    __floordiv__ = lambda x, o: get_client() // o
-    __mod__ = lambda x, o: get_client() % o
-    __divmod__ = lambda x, o: get_client().__divmod__(o)
-    __pow__ = lambda x, o: get_client() ** o
-    __lshift__ = lambda x, o: get_client() << o
-    __rshift__ = lambda x, o: get_client() >> o
-    __and__ = lambda x, o: get_client() & o
-    __xor__ = lambda x, o: get_client() ^ o
-    __or__ = lambda x, o: get_client() | o
-    __div__ = lambda x, o: get_client().__div__(o)
-    __truediv__ = lambda x, o: get_client().__truediv__(o)
-    __neg__ = lambda x: -(get_client())
-    __pos__ = lambda x: +(get_client())
-    __abs__ = lambda x: abs(get_client())
-    __invert__ = lambda x: ~(get_client())
-    __complex__ = lambda x: complex(get_client())
-    __int__ = lambda x: int(get_client())
-    if not six.PY2:
-        __long__ = lambda x: long(get_client())
-    __float__ = lambda x: float(get_client())
-    __str__ = lambda x: str(get_client())
-    __unicode__ = lambda x: six.text_type(get_client())
-    __oct__ = lambda x: oct(get_client())
-    __hex__ = lambda x: hex(get_client())
-    __index__ = lambda x: get_client().__index__()
-    __coerce__ = lambda x, o: x.__coerce__(x, o)
-    __enter__ = lambda x: x.__enter__()
-    __exit__ = lambda x, *a, **kw: x.__exit__(*a, **kw)
-
-client = ProxyClient()
-
 default_client_class = 'opbeat.contrib.django.DjangoClient'
 
 
@@ -143,6 +71,9 @@ def get_client_config():
         async_mode=config.get('ASYNC_MODE', None),
         instrument_django_middleware=config.get('INSTRUMENT_DJANGO_MIDDLEWARE'),
     )
+
+
+_client = (None, None)
 
 
 def get_client(client=None):
@@ -209,7 +140,7 @@ def register_handlers():
         from opbeat.contrib.celery import register_signal
 
         try:
-            register_signal(client)
+            register_signal(get_client())
         except Exception as e:
             logger.exception('Failed installing django-celery hook: %s' % e)
 

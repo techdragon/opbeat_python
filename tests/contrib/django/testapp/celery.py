@@ -5,7 +5,7 @@ from django.conf import settings
 from celery import Celery
 
 from opbeat.contrib.celery import register_signal
-from opbeat.contrib.django.models import client, logger, register_handlers
+from opbeat.contrib.django.models import get_client, logger, register_handlers
 
 app = Celery('testapp')
 
@@ -17,7 +17,7 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 
 try:
-    register_signal(client)
+    register_signal(get_client())
 except Exception as e:
     logger.exception('Failed installing celery hook: %s' % e)
 

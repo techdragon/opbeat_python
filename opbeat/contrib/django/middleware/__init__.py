@@ -16,7 +16,7 @@ import threading
 
 from django.conf import settings as django_settings
 
-from opbeat.contrib.django.models import client, get_client
+from opbeat.contrib.django.models import get_client
 from opbeat.utils import (build_name_with_http_method_prefix,
                           disabled_due_to_debug, get_name_from_func, wrapt)
 
@@ -35,6 +35,10 @@ def _is_ignorable_404(uri):
 
 
 class Opbeat404CatchMiddleware(object):
+
+    def __init__(self):
+        self.client = get_client()
+
     def process_response(self, request, response):
         if (response.status_code != 404 or
                 _is_ignorable_404(request.get_full_path())):
@@ -44,12 +48,12 @@ class Opbeat404CatchMiddleware(object):
                     django_settings.DEBUG
                 ):
             return response
-        data = client.get_data_from_request(request)
+        data = self.client.get_data_from_request(request)
         data.update({
             'level': logging.INFO,
             'logger': 'http404',
         })
-        result = client.capture(
+        result = self.client.capture(
             'Message',
             param_message={
                 'message': 'Page Not Found: %s',
@@ -57,8 +61,8 @@ class Opbeat404CatchMiddleware(object):
             }, data=data
         )
         request.opbeat = {
-            'app_id': data.get('app_id', client.app_id),
-            'id': client.get_ident(result),
+            'app_id': data.get('app_id', self.client.app_id),
+            'id': self.client.get_ident(result),
         }
         return response
 
@@ -135,7 +139,7 @@ class OpbeatAPMMiddleware(object):
                         process_response_wrapper,
                     )
             except ImportError:
-                client.logger.info(
+                self.client.logger.info(
                     "Can't instrument middleware %s", middleware_path
                 )
 

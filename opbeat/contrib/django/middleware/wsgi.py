@@ -25,5 +25,6 @@ class Opbeat(Opbeat):
 
     @property
     def client(self):
-        from opbeat.contrib.django.models import client
-        return client
+        from opbeat.contrib.django.models import get_client
+
+        return get_client()

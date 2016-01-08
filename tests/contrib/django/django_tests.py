@@ -32,7 +32,7 @@ from opbeat.contrib.django.handlers import OpbeatHandler
 from opbeat.contrib.django.management.commands.opbeat import \
     Command as DjangoCommand
 from opbeat.contrib.django.middleware.wsgi import Opbeat
-from opbeat.contrib.django.models import client, get_client, get_client_config
+from opbeat.contrib.django.models import get_client, get_client_config
 from opbeat.traces import Transaction
 from opbeat.utils import six
 from opbeat.utils.lru import LRUCache
@@ -43,9 +43,6 @@ try:
 except ImportError:
     from opbeat.utils.compat import noop_decorator as with_eager_tasks
     has_with_eager_tasks = False
-
-
-settings.OPBEAT = {'CLIENT': 'tests.contrib.django.django_tests.TempStoreClient'}
 
 
 class MockClientHandler(TestClientHandler):
@@ -67,24 +64,6 @@ class TempStoreClient(DjangoClient):
 
     def send(self, **kwargs):
         self.events.append(kwargs)
-
-
-class ClientProxyTest(TestCase):
-    def test_proxy_responds_as_client(self):
-        self.assertEquals(get_client(), client)
-
-    def test_basic(self):
-        config = {
-            'APP_ID': 'key',
-            'ORGANIZATION_ID': 'org',
-            'SECRET_TOKEN': '99'
-        }
-        config.update(settings.OPBEAT)
-        event_count = len(client.events)
-        with self.settings(OPBEAT=config):
-            client.capture('Message', message='foo')
-            self.assertEquals(len(client.events), event_count + 1)
-            client.events.pop(0)
 
 
 class DjangoClientTest(TestCase):
