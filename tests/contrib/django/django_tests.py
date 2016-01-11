@@ -45,6 +45,9 @@ except ImportError:
     has_with_eager_tasks = False
 
 
+settings.OPBEAT = {'CLIENT': 'tests.contrib.django.django_tests.TempStoreClient'}
+
+
 class MockClientHandler(TestClientHandler):
     def __call__(self, environ, start_response=[]):
         # this pretends doesnt require start_response
