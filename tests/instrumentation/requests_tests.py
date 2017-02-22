@@ -21,7 +21,7 @@ class InstrumentRequestsTest(TestCase):
             requests.get('http://example.com')
         self.client.end_transaction("MyView")
 
-        _, traces = self.client.instrumentation_store.get_all()
+        _, traces, raw_transactions = self.client.instrumentation_store.get_all()
         self.assertIn('GET example.com', map(lambda x: x['signature'], traces))
 
     @mock.patch("requests.sessions.Session.send")
@@ -32,7 +32,7 @@ class InstrumentRequestsTest(TestCase):
             s.get('http://example.com')
         self.client.end_transaction("MyView")
 
-        _, traces = self.client.instrumentation_store.get_all()
+        _, traces, raw_transactions = self.client.instrumentation_store.get_all()
         self.assertIn('GET example.com', map(lambda x: x['signature'], traces))
 
     def test_requests_instrumentation_malformed_none(self):
