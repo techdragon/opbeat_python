@@ -78,3 +78,5 @@ def is_master_process():
         return os.getpid() == uwsgi.masterpid()
     except ImportError:
         return False
+    except FileNotFoundError:
+        return False
